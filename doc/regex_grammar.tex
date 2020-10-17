@@ -1,0 +1,141 @@
+\documentclass[a4paper, 12pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[ngerman]{babel}
+\usepackage{a4wide}
+
+\usepackage{textcomp}       % for symbols
+\usepackage{microtype}
+\usepackage{mathptmx}       % selects Times Roman as basic font
+%\usepackage{helvet}         % selects Helvetica as sans-serif font
+%\usepackage{courier}        % selects Courier as typewriter font
+%usepackage{ascii}
+\renewcommand*\ttdefault{txtt}
+\usepackage{xcolor}
+\usepackage{setspace}
+\onehalfspacing
+
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{multirow}
+\usepackage{amsthm}
+
+\newtheoremstyle{mystyle}% <name>
+{3pt}% <Space above>
+{3pt}% <Space below>
+{}% <Body font>
+{}% <Indent amount>
+{\bf}% <Theorem head font>
+{:}% <Punctuation after theorem head>
+{.5em}% <Space after theorem headi>
+{}% <Theorem head spec (can be left empty, meaning `normal')>
+\theoremstyle{mystyle}
+\newtheorem{definition}{Definition}
+\newtheorem{task}{Aufgabe}
+%\newtheorem{task
+\newtheorem{example}{Beispiel}
+
+\usepackage[hyphens]{url}
+\usepackage{hyperref}
+\hypersetup
+{
+    pdfauthor={Harald Lampesberger},
+    pdftitle={Intrusion Detection},
+    citecolor=blue,
+    urlcolor=black,
+    linkcolor=black,
+    colorlinks=true
+}
+
+\definecolor{blue}{rgb}{0,0,0.75}
+\definecolor{green}{rgb}{0,0.75,0}
+\definecolor{lgray}{rgb}{0.9,0.9,0.9}
+\definecolor{deepblue}{rgb}{0,0,0.5}
+\definecolor{deepred}{rgb}{0.6,0,0}
+\definecolor{deepgreen}{rgb}{0,0.5,0}
+
+\usepackage{listings}
+\lstset{
+language=Python,
+basicstyle=\ttfamily\normalsize,
+otherkeywords={self, bytes, float},
+keywordstyle=\color{blue}\bfseries,
+emph={},          % Custom highlighting
+emphstyle=\ttb\color{deepred},    % Custom highlighting style
+stringstyle=\color{deepgreen},
+%frame=tb,                         % Any extra options here
+showstringspaces=false            % 
+}
+
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+\usetikzlibrary{shapes,arrows,trees,positioning}
+\usetikzlibrary{decorations.markings,decorations.pathmorphing}
+
+\usepackage{dirtree}
+
+\title{Multi Regex Matching}
+\author{Sichere Informationssysteme, Intrusion Detection Systems ILV\\
+\normalsize Harald Lampesberger}
+\date{\normalsize Sommersemester 2016}
+\begin{document}
+%\maketitle
+
+
+
+
+\begin{eqnarray}
+\mathbf{rootExpression} & \to & \text{\color{red}\texttt{\^}}? \; expression \; \text{\color{red}\texttt{\$}}? \\
+expression & \to & choice \mid term \mid \epsilon \\
+choice & \to & term \; \text{\color{red}\texttt{|}} \; expression \\
+term & \to & sequence \mid factor \\
+sequence & \to & factor \; term \\
+factor & \to & iteration \mid eventually \mid atom \\
+atom & \to & anyCharacter \mid characterClass \mid character \mid \text{\color{red}\texttt{(}} \; expression \; \text{\color{red}\texttt{)}} \\
+iteration & \to & atom \; \text{\color{red}\texttt{*}} \\
+%oneOrMore & \to & atom \; \text{\color{red}\texttt{+}} \\
+eventually & \to & atom \; \text{\color{red}\texttt{?}} \\
+%quantified & \to & atom \; \text{\color{red}\texttt{\{}} \; min \mid (min \; \text{\color{red}\texttt{,}}) \mid (min \; \text{\color{red}\texttt{,}} \; max) \mid (\text{\color{red}\texttt{,}} \; max) \; \text{\color{red}\texttt{\}}} \\
+%min = max & \to & digit^+ \\
+%characterClass & \to & \text{\color{red}\texttt{[}} \; \text{\color{red}\texttt{\^}}? \; (character \mid character \; \text{\color{red}\texttt{-}} \; character)^+ \text{\color{red}\texttt{]}} \\
+characterClass & \to & \text{\color{red}\texttt{[}} \; (escapedCharacter \mid alphanum \mid meta)^+ \text{\color{red}\texttt{]}} \\
+character & \to & escapedCharacter \mid alphanum \mid meta \\
+escapedCharacter & \to & \text{\color{red}\texttt{\textbackslash\textbackslash}} \mid \text{\color{red}\texttt{\textbackslash x}} \; hex \; hex \mid  \; \text{\color{red}\texttt{\textbackslash}} \; esc \\
+anyCharacter & = & \text{\color{red}\texttt{.}} \\
+%digit & \in & \text{\color{red}\texttt{0123456789}} \\
+alphanum & \in & \text{\color{red}\texttt{abcde}} \dots \text{\color{red}\texttt{zABCDE}} \dots \text{\color{red}\texttt{Z01}} \dots \text{\color{red}\texttt{789}} \\
+hex & \in & \text{\color{red}\texttt{0123456789ABCDEFabcdef}} \\
+esc & \in & \text{\color{red}\texttt{(){}[]*|+\textasciicircum \$/.?tnrf-}} \\
+meta & \in & \text{\color{red}\texttt{\textvisiblespace \#!"\%§\&'/,:;<=>@\_-}$\sim$}
+\end{eqnarray}
+
+%\vspace{1em}
+
+%\begin{table}
+%\centering
+%\label{tab:operators}
+%\caption{Unterstützte Operatoren für unsere eingeschränkte Regex Syntax.}
+\begin{tabular}{l|l}
+Operator                                                              & Beschreibung                            \\ \hline
+\color{red}\texttt{a} & Einzelnes ASCII Zeichen (Byte) \\
+\color{red}\texttt{\textbackslash}\color{black}$s$ & Escape-Sequenz für Sonderzeichen (Byte), z.B. Klammern   \\
+\color{red}\texttt{\textbackslash x}\color{black}$h_1h_2$ & Hex-Code für ein Zeichen (Byte)   \\
+\color{red}\texttt{.}                                             & Wildcard, irgendein Zeichen (Byte) \\
+\color{red}\texttt{[AaBbCc]}                                     & Alternativen für ein Zeichen (Byte), keine Ranges \\
+\color{red}\texttt{abracadabra} & Sequenz \\
+$expr_1$\color{red}\texttt{|}\color{black}$expr_2$                                             & Alternative (Infix) \\
+$expr$\color{red}\texttt{*}                   & $0\dots\infty$ Wiederholung (links-assoziativ)            \\
+%$expr$\color{red}\texttt{+}                   & $1\dots\infty$ Wiederholung (links-assoziativ)            \\
+%$expr$\color{red}\texttt{\{}{\color{black}$x$}\texttt{\}}                                       & Wiederholung exakt $x$-mal (links-assoziativ)         \\
+$expr$\color{red}\texttt{?}                                             & Optional (links-assoziativ)             \\
+{\color{red}\texttt{(}}$expr${\color{red}\texttt{)}}                                           &   Klammern für Gruppierung (Reihenfolge)   \\
+{\color{red}\texttt{\^}}$expr${\color{red}\texttt{\$}} & linker und rechter Anker (beide optional) \\
+\end{tabular}
+%\end{table}
+
+
+
+\end{document}

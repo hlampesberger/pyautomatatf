@@ -1,0 +1,2 @@
+^SEARCH AAAA
+^GET /(default\.ida|b.idq)\?
